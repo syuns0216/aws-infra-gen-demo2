@@ -1,0 +1,27 @@
+name: Deploy CloudFormation
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'infra/template.yaml'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Deploy CloudFormation
+        run: |
+          aws cloudformation deploy \
+            --template-file infra/template.yaml \
+            --stack-name generated-stack \
+            --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM
