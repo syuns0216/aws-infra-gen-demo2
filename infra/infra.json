@@ -1,0 +1,67 @@
+{
+  "description": "ALB → EC2 → RDS の3層構成",
+  "resources": [
+    {
+      "type": "VPC",
+      "name": "main-vpc",
+      "cidr": "10.0.0.0/16"
+    },
+    {
+      "type": "Subnet",
+      "name": "public-subnet-1a",
+      "cidr": "10.0.1.0/24",
+      "az": "ap-northeast-1a"
+    },
+    {
+      "type": "Subnet",
+      "name": "public-subnet-1c",
+      "cidr": "10.0.2.0/24",
+      "az": "ap-northeast-1c"
+    },
+    {
+      "type": "Subnet",
+      "name": "private-subnet-1a",
+      "cidr": "10.0.11.0/24",
+      "az": "ap-northeast-1a"
+    },
+    {
+      "type": "Subnet",
+      "name": "private-subnet-1c",
+      "cidr": "10.0.12.0/24",
+      "az": "ap-northeast-1c"
+    },
+    {
+      "type": "ALB",
+      "name": "web-alb",
+      "subnets": ["public-subnet-1a", "public-subnet-1c"]
+    },
+    {
+      "type": "EC2",
+      "name": "web-server",
+      "instanceType": "t3.micro",
+      "subnet": "private-subnet-1a"
+    },
+    {
+      "type": "RDS",
+      "name": "main-database",
+      "engine": "mysql",
+      "instanceClass": "db.t3.micro",
+      "subnets": ["private-subnet-1a", "private-subnet-1c"]
+    },
+    {
+      "type": "SecurityGroup",
+      "name": "alb-sg",
+      "ingress": [{"port": 80, "source": "0.0.0.0/0"}]
+    },
+    {
+      "type": "SecurityGroup",
+      "name": "ec2-sg",
+      "ingress": [{"port": 80, "source": "alb-sg"}]
+    },
+    {
+      "type": "SecurityGroup",
+      "name": "rds-sg",
+      "ingress": [{"port": 3306, "source": "ec2-sg"}]
+    }
+  ]
+}
